@@ -14,6 +14,9 @@
   var CELL_TYPE_START = 'CELL_TYPE_START'
   var CELL_TYPE_SIMPLE = 'CELL_TYPE_SIMPLE'
   var CELL_TYPE_QUESTION = 'CELL_TYPE_QUESTION'
+  var CELL_TYPE_RETURN = 'CELL_TYPE_RETURN'
+  var CELL_TYPE_SKIP = 'CELL_TYPE_SKIP'
+  var CELL_TYPE_FINISH = 'CELL_TYPE_FINISH'
   /* Все возможные действия в игре */
   var GAME_START = 'GAME_START'
   var GAME_PAUSE = 'GAME_PAUSE'
@@ -49,17 +52,59 @@
     }
   }
 
+  /* Вычисляет следующий экран игры, в случае если мы в SCREEN_GAMEPLAY */
+  function processGameplayScreen(state, action) {
+    switch (action.type) {
+      case GAME_NEXT_FRAME:
+        if (state.movement.progress < 1) {
+          return SCREEN_GAMEPLAY
+        } else {
+          switch (staticData.cells[state.movement.endCell].type) {
+            case CELL_TYPE_SIMPLE: return SCREEN_DICE
+            case CELL_TYPE_QUESTION: return SCREEN_QUESTION
+            case CELL_TYPE_RETURN: return SCREEN_GAMEPLAY
+            case CELL_TYPE_SKIP: return SCREEN_DICE
+            case CELL_TYPE_FINISH: return SCREEN_SCORE
+            default: return SCREEN_DICE
+          }
+        }
+      case GAME_PAUSE:
+        return SCREEN_PAUSE
+      default:
+        return SCREEN_GAMEPLAY
+    }
+  }
+
   /* Вычисляет следующий экран игры */
   function processScreen(state, action) {
-    switch (action.type) {
-      case GAME_START:
-        if (state.screen === SCREEN_INTRO) {
-          return SCREEN_PREPARE;
-        } else if (state.screen === SCREEN_PREPARE) {
-          return SCREEN_DICE;
+    switch (state.screen) {
+      case SCREEN_INTRO:
+        return action.type === GAME_START ? SCREEN_PREPARE : SCREEN_INTRO
+      case SCREEN_PREPARE:
+        return action.type === GAME_START && state.players.length > 0 ?
+          SCREEN_DICE : SCREEN_PREPARE
+      case SCREEN_DICE:
+        return action.type === GAME_MAKE_TURN ? SCREEN_GAMEPLAY : SCREEN_DICE
+      case SCREEN_GAMEPLAY:
+        return processGameplayScreen(state, action)
+      case SCREEN_PAUSE:
+        if (action.type === GAME_RESUME) {
+          return SCREEN_GAMEPLAY
+        } else if (action.type === GAME_QUIT) {
+          return SCREEN_INTRO
         } else {
-          return state.screen
+          return SCREEN_PAUSE
         }
+      case SCREEN_QUESTION:
+        return action.type === GAME_MAKE_ANSWER ? SCREEN_DICE : SCREEN_QUESTION
+      case SCREEN_CONGRATULATIONS:
+        if (action.type === GAME_RESUME) {
+          return state.players.every(function isFinished(player) {
+            return player.isFinished
+          }) ? SCREEN_SCORE : SCREEN_DICE
+        }
+      case SCREEN_SCORE:
+        return action.type === GAME_END ? SCREEN_INTRO : SCREEN_SCORE
       default:
         return state.screen
     }
