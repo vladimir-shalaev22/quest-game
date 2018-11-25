@@ -41,9 +41,15 @@ body {
   width: 100%;
   height: 100%;
   text-align: center;
-  background: #95edff;
   border-radius: 3px;
   box-sizing: border-box;
+}
+
+#intro-screen,
+#prepare-screen,
+#congratulations-screen,
+.game__canvas {
+  background: #95edff;
 }
 
 .game__screen {
@@ -63,6 +69,10 @@ body {
   background: #fff;
   border-radius: 5px;
   text-decoration: none;
+}
+
+.game__start_dice {
+  margin-top: 200px;
 }
 
 .game__answer {

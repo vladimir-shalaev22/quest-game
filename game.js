@@ -387,6 +387,16 @@ var __GAME__ = {};
     }
   }, ctx = gameView.canvas.getContext('2d')
 
+  var sprites = {
+    'cell': 'images/cell.png',
+    'start': 'images/cell-s.png',
+    'question': 'images/cell-q.png',
+    'warning': 'images/cell-w.png',
+    'finish': 'images/cell-f.png',
+    'start': 'images/cell-s.png',
+    'player': 'images/player.png'
+  }
+
   function updateScreen(name, isOpen) {
     gameView.screens[name].root
       .setAttribute('class', isOpen ? 'game__screen game__screen_active' : 'game__screen')
@@ -402,13 +412,18 @@ var __GAME__ = {};
     }
   }
 
+  function easeOutCubic(t) {
+    return (--t) * t * t + 1
+  }
+
   function calcMovementPosition(player) {
     if (player.isMoving) {
       var start = game.staticData.cells[player.position].position
       var end = game.staticData.cells[player.target].position
+      var p = easeOutCubic(player.progress)
       return [
-        start[0] + (end[0] - start[0]) * player.progress,
-        start[1] + (end[1] - start[1]) * player.progress
+        start[0] + (end[0] - start[0]) * p,
+        start[1] + (end[1] - start[1]) * p
       ]
     } else {
       return game.staticData.cells[player.position].position
@@ -418,8 +433,23 @@ var __GAME__ = {};
   function renderField(state) {
     ctx.clearRect(0, 0, 800, 600)
     game.staticData.cells.forEach(function renderCell(cell) {
+      var sprite;
+      var offset;
       ctx.fillStyle = 'rgba(46, 42, 94, 1)'
-      ctx.fillRect(cell.position[0] - 20, cell.position[1] - 20, 40, 40)
+      switch (cell.type) {
+        case 'CELL_TYPE_SKIP':
+        case 'CELL_TYPE_RETURN':
+          offset = 30; sprite = sprites.warning; break;
+        case 'CELL_TYPE_START':
+          offset = 45; sprite = sprites.start; break;
+        case 'CELL_TYPE_FINISH':
+          offset = 45; sprite = sprites.finish; break;
+        case 'CELL_TYPE_QUESTION':
+          offset = 30; sprite = sprites.question; break;
+        default:
+          offset = 30; sprite = sprites.cell
+      }
+      ctx.drawImage(sprite, cell.position[0] - offset, cell.position[1] - offset)
     })
     state.players.forEach(function renderPlayer(player) {
       var position = calcMovementPosition(player)
@@ -428,10 +458,10 @@ var __GAME__ = {};
       } else {
         ctx.fillStyle = 'rgba(0, 150, 136, 1)'
       }
-      ctx.fillRect(position[0] - 15, position[1] - 15, 30, 30)
+      ctx.drawImage(sprites.player, position[0] - 16, position[1] - 20)
       ctx.textAlign = 'right'
       ctx.font = '16px Pacifico'
-      ctx.fillStyle = 'rgba(0, 150, 136, 1)'
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
       ctx.fillText(player.name, position[0] - 25, position[1] + 4)
     })
   }
@@ -460,11 +490,19 @@ var __GAME__ = {};
       state.players[state.currentPlayer].name + ', ответьте на следующий вопрос:'
   }
 
+  function updateCongratulations(state) {
+    gameView.screens.congratulations.result.innerText =
+      'Вы набрали ' + state.players[state.currentPlayer].score +' очков'
+  }
+
   function updateView(state) {
     if (prevState.screen !== state.screen) {
       console.log('Экран изменился!')
       if (state.screen === 'SCREEN_QUESTION') {
         loadQuestion(state)
+      }
+      if (state.screen === 'SCREEN_CONGRATULATIONS') {
+        updateCongratulations(state)
       }
       updateScreen('intro', state.screen === 'SCREEN_INTRO')
       updateScreen('prepare', state.screen === 'SCREEN_PREPARE')
@@ -546,12 +584,26 @@ var __GAME__ = {};
     }, 500)
   })
 
-  game.subscribe(updateView)
-
   function animate() {
-    game.dispatch({type: 'GAME_NEXT_FRAME', delta: 15})
-    setTimeout(animate, 100)
+    game.dispatch({type: 'GAME_NEXT_FRAME', delta: 10})
+    setTimeout(animate, 50)
   }
 
-  animate()
+  function loader() {
+    var total = Object.getOwnPropertyNames(sprites).length
+    Object.getOwnPropertyNames(sprites).forEach((sprite) => {
+      var img = new Image()
+      img.addEventListener('load', function load() {
+        sprites[sprite] = img
+        if (--total <= 0) {
+          document.getElementById('loading-screen').setAttribute('class', 'game__screen')
+          game.subscribe(updateView)
+          animate()
+        }
+      })
+      img.src = sprites[sprite]
+    })
+  }
+
+  loader()
 })(__GAME__)

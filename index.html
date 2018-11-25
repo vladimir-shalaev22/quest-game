@@ -13,6 +13,11 @@
         <div class="game__canvas">
           <canvas id="canvas" width="800" height="600"></canvas>
         </div>
+        <!-- LOADING SCREEN -->
+        <div id="loading-screen" class="game__screen game__screen_active">
+          <h1 class="game__guide game__guide_loading">Загрузка...</h1>
+        </div>
+        <!-- LOADING SCREEN -->
         <!-- INTRO SCREEN -->
         <div id="intro-screen" class="game__screen">
           <div class="intro-logo"></div>
@@ -34,7 +39,7 @@
         <div id="dice-screen" class="game__screen">
           <h1 id="dice-cta" class="game__guide">Бросьте игральную кость на удачу!</h1>
           <div id="dice-result" class="game__dice">Кубик у вас в руках</div>
-          <a id="make-turn" href="#" class="game__start">Бросаем!</a>
+          <a id="make-turn" href="#" class="game__start game__start_dice">Бросаем!</a>
         </div>
         <!-- DICE SCREEN -->
         <!-- QUESTION_SCREEN -->
