@@ -5,8 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Simple Quest Game</title>
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <div class="game">
+      <div class="game__window">
+        <div class="game__canvas">
+          <canvas id="canvas" width="800" height="600"></canvas>
+        </div>
+        <!-- INTRO SCREEN -->
+        <div id="intro-screen" class="game__screen">
+          <div class="intro-logo"></div>
+          <a id="start-game" href="#" class="game__start">Начать игру</a>
+        </div>
+        <!-- INTRO SCREEN -->
+        <!-- PREPARE SCREEN -->
+        <div id="prepare-screen" class="game__screen">
+          <h1 class="game__guide">Добавьте в игру одного или нескольких игроков</h1>
+          <form action="#" class="add-player">
+            <h2 id="players-list" class="add-player__title">Как вас зовут? Или придумаем ник?</h2>
+            <input id="player-name" class="add-player__name" name="name" type="text" placeholder="Имя игрока">
+            <a id="add-player" href="#" class="add-player__add">Добавить</a>
+          </form>
+          <a id="start-game-2" href="#" class="game__start">Поехали!</a>
+        </div>
+        <!-- PREPARE SCREEN -->
+        <!-- DICE SCREEN -->
+        <div id="dice-screen" class="game__screen game__screen_active">
+          <h1 id="dice-cta" class="game__guide">Бросьте игральную кость на удачу!</h1>
+          <div id="dice-result" class="game__dice">Кубик у вас в руках</div>
+          <a id="make-turn" href="#" class="game__start">Бросаем!</a>
+        </div>
+        <!-- DICE SCREEN -->
+      </div>
+    </div>
     <script src="game.js"></script>
   </body>
 </html>

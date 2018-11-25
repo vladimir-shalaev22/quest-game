@@ -1,0 +1,111 @@
+@font-face {
+  font-family: 'Pacifico';
+  src: url('fonts/Pacifico-Regular.woff2') format('woff2'),
+  url('fonts/Pacifico-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body, h1, h2, h3, h4, h5, h6, ul, ol, li, p {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font: 18px 'Pacifico', sans-serif;
+}
+
+.game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #303030;
+}
+
+.game__window {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 800px;
+  height: 600px;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.game__canvas,
+.game__screen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  background: #95edff;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.game__screen {
+  display: none;
+}
+
+.game__screen_active {
+  display: block;
+}
+
+.game__start {
+  display: inline-block;
+  margin-top: 60px;
+  padding: 10px 30px;
+  color: #2E2A5E;
+  font-size: 20px;
+  background: #fff;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.game__guide {
+  margin-top: 40px;
+  color: #B34D96;
+  font-size: 28px;
+}
+
+.game__dice {
+  font-size: 28px;
+  margin-top: 159px;
+}
+
+.add-player {
+  margin-top: 100px;
+}
+
+.add-player__title {
+  margin: 20px 0;
+  font-size: 24px;
+}
+
+.add-player__name {
+  padding: 7px 20px;
+  border: 1px solid rgba(179, 77, 130, 0.2);
+  border-radius: 5px;
+  font: 14px 'Pacifico', sans-serif;
+}
+
+.add-player__add {
+  display: inline-block;
+  padding: 7px 20px;
+  color: #fff;
+  border: 1px solid #B34D96;
+  border-radius: 5px;
+  background: #B34D96;
+  font: 14px 'Pacifico', sans-serif;
+  text-decoration: none;
+}
+
+.intro-logo {
+  margin: 40px auto;
+  width: 517px;
+  height: 335px;
+  background: url('images/logo.png');
+}
