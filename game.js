@@ -416,6 +416,13 @@ var __GAME__ = {};
     return (--t) * t * t + 1
   }
 
+  function viewportOffset(p) {
+    var origin = [p[0] - 400, p[0] + 400, p[1] - 300, p[1] + 300]
+    var left = origin[1] <= 1600 ? Math.max(origin[0], 0) : 800
+    var top = origin[3] <= 1200 ? Math.max(origin[2], 0) : 600
+    return [left, top]
+  }
+
   function calcMovementPosition(player) {
     if (player.isMoving) {
       var start = game.staticData.cells[player.position].position
@@ -431,7 +438,13 @@ var __GAME__ = {};
   }
 
   function renderField(state) {
-    ctx.clearRect(0, 0, 800, 600)
+    if (state.players.length > 0) {
+      var current = state.players[state.currentPlayer]
+      var viewport = viewportOffset(calcMovementPosition(current))
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.clearRect(0, 0, 800, 600)
+      ctx.translate(-viewport[0], -viewport[1])
+    }
     game.staticData.cells.forEach(function renderCell(cell) {
       var sprite;
       var offset;
