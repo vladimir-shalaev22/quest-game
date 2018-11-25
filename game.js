@@ -12,7 +12,7 @@ var __GAME__ = {};
   var SCREEN_SCORE = 'SCREEN_SCORE'
   /* Игровые процессы или действия */
   var ACTION_NONE = 'ACTION_NONE'
-  var ANIMATION_SPEED = 0.01
+  var ANIMATION_SPEED = 0.003
   /* Типы клеточек по которым мы передвигаемся */
   var CELL_TYPE_START = 'CELL_TYPE_START'
   var CELL_TYPE_SIMPLE = 'CELL_TYPE_SIMPLE'
@@ -33,13 +33,31 @@ var __GAME__ = {};
 
   /* Статичные данные игры */
   var staticData = {
+    questions: [
+      {
+        text: 'Сколько депутатов состоит в  Барнаульской городской думе?',
+        answers: ['7', '50', '40'],
+        score: 100,
+        right: 2
+      },
+      {
+        text: 'Кто был избран главой города Барнаула в 2017 году?',
+        answers: [
+          'Дугин Сергей Иванович',
+          'Собянин Сергей Семенович',
+          'Волков Михаил Давидович'
+        ],
+        score: 50,
+        right: 0
+      }
+    ],
     cells: [
       {type: CELL_TYPE_START, position: [52, 548], next: 1},
       {type: CELL_TYPE_SIMPLE, position: [119, 482], next: 2},
       {type: CELL_TYPE_SIMPLE, position: [171, 430], next: 3},
-      {type: CELL_TYPE_SIMPLE, position: [230, 384], next: 4},
+      {type: CELL_TYPE_QUESTION, position: [230, 384], next: 4, question: 0},
       {type: CELL_TYPE_SIMPLE, position: [368, 374], next: 5},
-      {type: CELL_TYPE_SIMPLE, position: [436, 376], next: 6},
+      {type: CELL_TYPE_QUESTION, position: [436, 376], next: 6, question: 1},
       {type: CELL_TYPE_SIMPLE, position: [499, 409], next: 7},
       {type: CELL_TYPE_FINISH, position: [567, 427], next: 0}
     ]
@@ -49,110 +67,61 @@ var __GAME__ = {};
   var state = {
     screen: SCREEN_INTRO,
     players: [],
-    currentPlayer: 0,
-    movement: {
-      startCell: 0,
-      endCell: 0,
-      progress: 0,
-      player: 0
-    }
+    currentPlayer: 0
   }
 
   /* Подписчики на изменения стейта */
   var listeners = []
 
-  /* Определяет закончил ли игрок игру */
-  function isFinished(player) {
-    return player.isFinished
-  }
-
-  /* Вычисляет следующий экран игры, в случае если мы в SCREEN_GAMEPLAY */
-  function processGameplayScreen(state, action, movement) {
-    switch (action.type) {
-      case GAME_NEXT_FRAME:
-        if (movement.progress < 1) {
-          return SCREEN_GAMEPLAY
-        } else {
-          switch (staticData.cells[movement.endCell].type) {
-            case CELL_TYPE_SIMPLE: return SCREEN_DICE
-            case CELL_TYPE_QUESTION: return SCREEN_QUESTION
-            case CELL_TYPE_RETURN: return SCREEN_GAMEPLAY
-            case CELL_TYPE_SKIP: return SCREEN_DICE
-            case CELL_TYPE_FINISH: return SCREEN_SCORE
-            default: return SCREEN_DICE
-          }
-        }
-      case GAME_PAUSE:
-        return SCREEN_PAUSE
-      default:
-        return SCREEN_GAMEPLAY
+  /* Обновляет состояние игрока */
+  function updatePlayer(player, delta) {
+    if (player.isMoving) {
+      var progress = Math.min(player.progress + delta * ANIMATION_SPEED, 1)
+      var isMoving = progress < 1
+      var turnIsDone = !isMoving
+      var endCellType = staticData.cells[player.target].type
+      if (turnIsDone) {
+        return Object.assign({}, player, {
+          isMoving: isMoving,
+          progress: progress,
+          position: player.target,
+          toSkip: endCellType === CELL_TYPE_SKIP,
+          isFinished: endCellType === CELL_TYPE_FINISH,
+          isRight: false
+        })
+      } else {
+        return Object.assign({}, player, {progress: progress})
+      }
+    } else {
+      return player
     }
   }
 
-  /* Вычисляет следующий экран игры */
-  function processScreen(state, action, movement) {
-    switch (state.screen) {
-      case SCREEN_INTRO:
-        return action.type === GAME_START ? SCREEN_PREPARE : SCREEN_INTRO
-      case SCREEN_PREPARE:
-        return action.type === GAME_START && state.players.length > 0 ?
-          SCREEN_DICE : SCREEN_PREPARE
-      case SCREEN_DICE:
-        return action.type === GAME_MAKE_TURN ? SCREEN_GAMEPLAY : SCREEN_DICE
-      case SCREEN_GAMEPLAY:
-        return processGameplayScreen(state, action, movement)
-      case SCREEN_PAUSE:
-        if (action.type === GAME_RESUME) {
-          return SCREEN_GAMEPLAY
-        } else if (action.type === GAME_QUIT) {
-          return SCREEN_INTRO
-        } else {
-          return SCREEN_PAUSE
-        }
-      case SCREEN_QUESTION:
-        return action.type === GAME_MAKE_ANSWER ? SCREEN_DICE : SCREEN_QUESTION
-      case SCREEN_CONGRATULATIONS:
-        if (action.type === GAME_RESUME) {
-          return state.players.every(isFinished) ? SCREEN_SCORE : SCREEN_DICE
-        }
-      case SCREEN_SCORE:
-        return action.type === GAME_END ? SCREEN_INTRO : SCREEN_SCORE
-      default:
-        return state.screen
+  /* Итерация поиска маршрута */
+  function nextCell(cell, left, isRight) {
+    if (left === 0 || staticData.cells[cell].type === CELL_TYPE_FINISH) {
+      return cell
+    } else if (staticData.cells[cell].next) {
+      return nextCell(staticData.cells[cell].next, left - 1, isRight)
+    } else if (isRight) {
+      return nextCell(staticData.cells[cell].right, left - 1, isRight)
+    } else {
+      return nextCell(staticData.cells[cell].left, left - 1, isRight)
     }
   }
 
-  /* Обновляет должным образом текущего игрока */
-  function updatePlayers(state, cellType) {
-    var players = state.players.slice()
-    var current = state.currentPlayer
-    switch (cellType) {
-      case CELL_TYPE_FINISH:
-        players[current] = Object.assign({}, players[current], {
-          position: state.movement.endCell,
-          isFinished: true,
-          isRight: false
-        })
-        return players
-      case CELL_TYPE_SKIP:
-        players[current] = Object.assign({}, players[current], {
-          position: state.movement.endCell,
-          toSkip: true,
-          isRight: false
-        })
-        return players
-      default:
-        players[current] = Object.assign({}, players[current], {
-          position: state.movement.endCell,
-          isRight: false
-        })
-        return players
-    }
+  /* Находит конечный пункт хода */
+  function findEndCell(player, dice, left) {
+    return nextCell(
+      player.position,
+      dice,
+      player.isRight ? player.isRight : dice % 2 === 0
+    )
   }
 
   /* Вычисляет состояние игроков */
-  function processPlayers(state, action, movement) {
-    var endCellType = staticData.cells[state.movement.endCell].type
+  function processPlayers(state, action) {
+    var current = state.players[state.currentPlayer]
     var players = state.players.slice()
     switch (action.type) {
       case GAME_ADD_PLAYER:
@@ -161,8 +130,10 @@ var __GAME__ = {};
       case GAME_QUIT:
         return []
       case GAME_NEXT_FRAME:
-        if (movement.progress === 1 && state.screen === SCREEN_GAMEPLAY) {
-          return updatePlayers(state, endCellType)
+        if (state.screen === SCREEN_GAMEPLAY) {
+          return players.map(function (player) {
+            return updatePlayer(player, action.delta)
+          })
         } else {
           return state.players
         }
@@ -172,9 +143,26 @@ var __GAME__ = {};
           score: players[state.currentPlayer].score + action.score
         })
         return players
+      case GAME_MAKE_TURN:
+        players[state.currentPlayer] = Object.assign({}, players[state.currentPlayer], {
+          isMoving: true,
+          progress: 0,
+          target: findEndCell(current, action.dice)
+        })
+        return players
       default:
         return state.players
     }
+  }
+
+  /* Определеят тип ячейки куда движется игрок */
+  function getEndCellType(player) {
+    return staticData.cells[player.target].type
+  }
+
+  /* Определяет закончил ли игрок игру */
+  function isFinished(player) {
+    return player.isFinished
   }
 
   /* Поиск следующего игрока */
@@ -200,21 +188,24 @@ var __GAME__ = {};
   }
 
   /* Вычисляет текущего игрока */
-  function processCurrent(state, action, players, movement) {
-    var endCellType = staticData.cells[movement.endCell].type
+  function processCurrent(state, action, players) {
+    if (state.players.length < 1) {
+      return {players: players, current: state.currentPlayer}
+    }
+    var current = players[state.currentPlayer]
     var isGameOver = players.every(isFinished)
+    var endCellType = getEndCellType(current)
     var next = state.currentPlayer + 1
     var max = players.length
     switch (action.type) {
       case GAME_NEXT_FRAME:
-        if (movement.progress < 1) {
+        if (current.isMoving) {
           return {
             players: players,
             current: state.currentPlayer
           }
         } else if (state.screen === SCREEN_GAMEPLAY) {
           switch (endCellType) {
-            case CELL_TYPE_FINISH:
             case CELL_TYPE_SIMPLE:
             case CELL_TYPE_SKIP:
               return !isGameOver ? findNext(players, next < max ? next : 0, max)
@@ -225,6 +216,10 @@ var __GAME__ = {};
         } else {
           return {players: players, current: state.currentPlayer}
         }
+      case GAME_RESUME:
+        return state.screen === SCREEN_CONGRATULATIONS && !isGameOver ?
+          findNext(players, next < max ? next : 0, max)
+          : {players: players, current: 0}
       case GAME_MAKE_ANSWER:
         return !isGameOver ? findNext(players, next < max ? next : 0, max)
           : {players: players, current: 0}
@@ -233,76 +228,72 @@ var __GAME__ = {};
     }
   }
 
-  /* Обновляет состояние движения */
-  function updateMovement(state, action) {
-    var endCellType = staticData.cells[state.movement.endCell].type
-    var delta = action.delta * ANIMATION_SPEED
-    if (state.screen === SCREEN_GAMEPLAY) {
-      if (state.movement.progress < 1) {
-        return Object.assign({}, state.movement, {
-          progress: Math.min(state.movement.progress + delta, 1)
-        })
-      } else if (endCellType === CELL_TYPE_RETURN) {
-        return {
-          player: state.currentPlayer,
-          startCell: state.movement.endCell,
-          endCell: staticData.cells[state.movement.endCell].target,
-          progress: 0
-        }
-      }
-    }
-    return state.movement
-  }
-
-  /* Итерация поиска маршрута */
-  function nextCell(cell, left, isRight) {
-    if (left === 0 || staticData.cells[cell].type === CELL_TYPE_FINISH) {
-      return cell
-    } else if (staticData.cells[cell].next) {
-      return nextCell(staticData.cells[cell].next, left - 1, isRight)
-    } else if (isRight) {
-      return nextCell(staticData.cells[cell].right, left - 1, isRight)
-    } else {
-      return nextCell(staticData.cells[cell].left, left - 1, isRight)
-    }
-  }
-
-  /* Находит конечный пункт хода */
-  function findEndCell(player, dice, left) {
-    return nextCell(
-      player.position,
-      dice,
-      player.isRight ? player.isRight : dice % 2 === 0
-    )
-  }
-
-  /* Вычисляет состояние движения */
-  function processMovement(state, action) {
-    var currentPlayer = state.players[state.currentPlayer]
+  /* Вычисляет следующий экран игры, в случае если мы в SCREEN_GAMEPLAY */
+  function processGameplayScreen(state, action, players) {
+    var current = players[state.currentPlayer]
     switch (action.type) {
       case GAME_NEXT_FRAME:
-        return updateMovement(state, action)
-      case GAME_MAKE_TURN:
-        return {
-          startCell: currentPlayer.position,
-          endCell: findEndCell(currentPlayer, action.dice),
-          progress: 0
+        if (current.isMoving) {
+          return SCREEN_GAMEPLAY
+        } else {
+          switch (staticData.cells[current.target].type) {
+            case CELL_TYPE_SIMPLE: return SCREEN_DICE
+            case CELL_TYPE_QUESTION: return SCREEN_QUESTION
+            case CELL_TYPE_RETURN: return SCREEN_GAMEPLAY
+            case CELL_TYPE_SKIP: return SCREEN_DICE
+            case CELL_TYPE_FINISH: return SCREEN_CONGRATULATIONS
+            default: return SCREEN_DICE
+          }
         }
+      case GAME_PAUSE:
+        return SCREEN_PAUSE
       default:
-        return state.movement
+        return SCREEN_GAMEPLAY
     }
   }
 
-  /* Функция вычисляющая следующие состояние */
+  /* Вычисляет следующий экран игры */
+  function processScreen(state, action, players) {
+    switch (state.screen) {
+      case SCREEN_INTRO:
+        return action.type === GAME_START ? SCREEN_PREPARE : SCREEN_INTRO
+      case SCREEN_PREPARE:
+        return action.type === GAME_START && state.players.length > 0 ?
+          SCREEN_DICE : SCREEN_PREPARE
+      case SCREEN_DICE:
+        return action.type === GAME_MAKE_TURN ? SCREEN_GAMEPLAY : SCREEN_DICE
+      case SCREEN_GAMEPLAY:
+        return processGameplayScreen(state, action, players)
+      case SCREEN_PAUSE:
+        if (action.type === GAME_RESUME) {
+          return SCREEN_GAMEPLAY
+        } else if (action.type === GAME_QUIT) {
+          return SCREEN_INTRO
+        } else {
+          return SCREEN_PAUSE
+        }
+      case SCREEN_QUESTION:
+        return action.type === GAME_MAKE_ANSWER ? SCREEN_DICE : SCREEN_QUESTION
+      case SCREEN_CONGRATULATIONS:
+        if (action.type === GAME_RESUME) {
+          return players.every(isFinished) ? SCREEN_SCORE : SCREEN_DICE
+        } else {
+          return SCREEN_CONGRATULATIONS
+        }
+      case SCREEN_SCORE:
+        return action.type === GAME_END ? SCREEN_INTRO : SCREEN_SCORE
+      default:
+        return state.screen
+    }
+  }
+
   function nextState(state, action) {
-    var movement = processMovement(state, action)
-    var updatedPlayers = processPlayers(state, action, movement)
-    var next = processCurrent(state, action, updatedPlayers, movement)
+    var players = processPlayers(state, action)
+    var next = processCurrent(state, action, players)
     return {
-      screen: processScreen(state, action, movement),
+      screen: processScreen(state, action, players),
       players: next.players,
-      currentPlayer: next.current,
-      movement: movement
+      currentPlayer: next.current
     }
   }
 
@@ -313,7 +304,6 @@ var __GAME__ = {};
         listener(state)
       }
     })
-    console.log(state)
   }
 
   function subscribe(callback) {
@@ -324,9 +314,12 @@ var __GAME__ = {};
   function addPlayer(player) {
     dispatch({type: GAME_ADD_PLAYER, player: Object.assign({
       isFinished: false,
+      isMoving: false,
       isRight: false,
       toSkip: false,
+      progress: 0,
       position: 0,
+      target: 0,
       score: 0
     }, player)})
   }
@@ -335,18 +328,28 @@ var __GAME__ = {};
     dispatch({type: GAME_MAKE_TURN, dice: Date.now() % 6 + 1})
   }
 
+  function getState() {
+    return state
+  }
+
   Object.assign(game, {
     state: state,
     dispatch: dispatch,
     subscribe: subscribe,
     addPlayer: addPlayer,
     makeTurn: makeTurn,
-    staticData: staticData
+    staticData: staticData,
+    getState: getState
   })
 })(__GAME__);
 
 /* Работа с визуальной частью */
 (function initVisual(game) {
+  var prevState = {
+    screen: -1,
+    players: -1,
+    currentPlayer: -1
+  }
   var gameView = {
     canvas: document.getElementById('canvas'),
     screens: {
@@ -366,6 +369,20 @@ var __GAME__ = {};
         cta: document.getElementById('dice-cta'),
         result: document.getElementById('dice-result'),
         action: document.getElementById('make-turn')
+      },
+      question: {
+        root: document.getElementById('question-screen'),
+        message: document.getElementById('question-message'),
+        text: document.getElementById('question-text'),
+        answerA: document.getElementById('make-answer-a'),
+        answerB: document.getElementById('make-answer-b'),
+        answerC: document.getElementById('make-answer-c')
+      },
+      congratulations: {
+        root: document.getElementById('congratulations-screen'),
+        message: document.getElementById('congratulations-message'),
+        result: document.getElementById('congratulations-result'),
+        resume: document.getElementById('congratulations-resume')
       }
     }
   }, ctx = gameView.canvas.getContext('2d')
@@ -385,13 +402,17 @@ var __GAME__ = {};
     }
   }
 
-  function calcMovementPosition(state) {
-    var start = game.staticData.cells[state.movement.startCell].position
-    var end = game.staticData.cells[state.movement.endCell].position
-    return [
-      start[0] + (end[0] - start[0]) * state.movement.progress,
-      start[1] + (end[1] - start[1]) * state.movement.progress
-    ]
+  function calcMovementPosition(player) {
+    if (player.isMoving) {
+      var start = game.staticData.cells[player.position].position
+      var end = game.staticData.cells[player.target].position
+      return [
+        start[0] + (end[0] - start[0]) * player.progress,
+        start[1] + (end[1] - start[1]) * player.progress
+      ]
+    } else {
+      return game.staticData.cells[player.position].position
+    }
   }
 
   function renderField(state) {
@@ -400,26 +421,96 @@ var __GAME__ = {};
       ctx.fillStyle = 'rgba(46, 42, 94, 1)'
       ctx.fillRect(cell.position[0] - 20, cell.position[1] - 20, 40, 40)
     })
-    state.players.forEach(function renderPlayer(player, index) {
-      var cell = game.staticData.cells[player.position]
-      var position = calcMovementPosition(state)
-      if (index !== state.currentPlayer && state.movement.progress < 1) {
-        ctx.fillStyle = 'rgba(0, 150, 136, 1)'
-        ctx.fillRect(cell.position[0] - 15, cell.position[1] - 15, 30, 30)
+    state.players.forEach(function renderPlayer(player) {
+      var position = calcMovementPosition(player)
+      if (player.isMoving) {
+        ctx.fillStyle = 'rgba(250, 236, 0, 1)'
       } else {
         ctx.fillStyle = 'rgba(0, 150, 136, 1)'
-        ctx.fillRect(position[0] - 15, position[1] - 15, 30, 30)
       }
+      ctx.fillRect(position[0] - 15, position[1] - 15, 30, 30)
+      ctx.textAlign = 'right'
+      ctx.font = '16px Pacifico'
+      ctx.fillStyle = 'rgba(0, 150, 136, 1)'
+      ctx.fillText(player.name, position[0] - 25, position[1] + 4)
     })
   }
 
-  function updateView(state) {
-    updateScreen('intro', state.screen === 'SCREEN_INTRO')
-    updateScreen('prepare', state.screen === 'SCREEN_PREPARE')
-    updateScreen('dice', state.screen === 'SCREEN_DICE')
-    gameView.screens.prepare.list.innerText = makePlayersList(state)
-    renderField(state)
+  function updateDiceScreen(state) {
+    if (state.players.length > 0 && prevState.currentPlayer !== state.currentPlayer) {
+      gameView.screens.dice.cta.innerText =
+        state.players[state.currentPlayer].name + ', ваш ход'
+    }
   }
+
+  function loadQuestion(state) {
+    var cid = state.players[state.currentPlayer].target
+    var qcell = game.staticData.cells[cid]
+    var question = game.staticData.questions[qcell.question]
+    gameView.screens.question.text.style.display = 'block'
+    gameView.screens.question.answerA.style.display = 'inline-block'
+    gameView.screens.question.answerB.style.display = 'inline-block'
+    gameView.screens.question.answerC.style.display = 'inline-block'
+    gameView.screens.question.text.innerText = question.text
+    gameView.screens.question.answerA.innerText = question.answers[0]
+    gameView.screens.question.answerB.innerText = question.answers[1]
+    gameView.screens.question.answerC.innerText = question.answers[2]
+    gameView.screens.question.message.setAttribute('class', 'game__guide')
+    gameView.screens.question.message.innerText =
+      state.players[state.currentPlayer].name + ', ответьте на следующий вопрос:'
+  }
+
+  function updateView(state) {
+    if (prevState.screen !== state.screen) {
+      console.log('Экран изменился!')
+      if (state.screen === 'SCREEN_QUESTION') {
+        loadQuestion(state)
+      }
+      updateScreen('intro', state.screen === 'SCREEN_INTRO')
+      updateScreen('prepare', state.screen === 'SCREEN_PREPARE')
+      updateScreen('dice', state.screen === 'SCREEN_DICE')
+      updateScreen('question', state.screen === 'SCREEN_QUESTION')
+      updateScreen('congratulations', state.screen === 'SCREEN_CONGRATULATIONS')
+      firstTime = false
+    }
+    gameView.screens.prepare.list.innerText = makePlayersList(state)
+    updateDiceScreen(state)
+    renderField(state)
+    prevState = state
+  }
+
+  function processAnswer(event) {
+    var state = game.getState()
+    var cid = state.players[state.currentPlayer].target
+    var qcell = game.staticData.cells[cid]
+    var question = game.staticData.questions[qcell.question]
+    var answer = parseInt(event.target.getAttribute('data-id'))
+    var isRight = question.right === answer - 1
+    event.preventDefault()
+    gameView.screens.question.message.setAttribute('class', 'game__guide game__guide_message')
+    gameView.screens.question.text.style.display = 'none'
+    gameView.screens.question.answerA.style.display = 'none'
+    gameView.screens.question.answerB.style.display = 'none'
+    gameView.screens.question.answerC.style.display = 'none'
+    if (isRight) {
+      gameView.screens.question.message.innerText =
+        'Правильно! Вам начисляется ' + question.score + ' очков!'
+    } else {
+      gameView.screens.question.message.innerText =
+        'Увы, ответ неверный :( '
+    }
+    setTimeout(function endAnswer() {
+      game.dispatch({
+        type: 'GAME_MAKE_ANSWER',
+        isRight: isRight,
+        score: isRight ? question.score : 0
+      })
+    }, 1000)
+  }
+
+  gameView.screens.question.answerA.addEventListener('click', processAnswer)
+  gameView.screens.question.answerB.addEventListener('click', processAnswer)
+  gameView.screens.question.answerC.addEventListener('click', processAnswer)
 
   gameView.screens.intro.start.addEventListener('click', function (event) {
     event.preventDefault()
@@ -440,13 +531,18 @@ var __GAME__ = {};
     game.dispatch({type: 'GAME_START'})
   })
 
+  gameView.screens.congratulations.resume.addEventListener('click', function (event) {
+    event.preventDefault()
+    game.dispatch({type: 'GAME_RESUME'})
+  })
+
   gameView.screens.dice.action.addEventListener('click', function (event) {
     var dice = Date.now() % 6 + 1
     event.preventDefault()
     gameView.screens.dice.result.innerText = 'У вас выпало: ' + dice
     setTimeout(function () {
       game.dispatch({type: 'GAME_MAKE_TURN', dice: dice})
-      gameView.screens.dice.result.innerText = 'Бросьте игральную кость на удачу!'
+      gameView.screens.dice.result.innerText = 'Бросьте игральную кость!'
     }, 500)
   })
 
@@ -454,7 +550,7 @@ var __GAME__ = {};
 
   function animate() {
     game.dispatch({type: 'GAME_NEXT_FRAME', delta: 15})
-    setTimeout(animate, 1000)
+    setTimeout(animate, 100)
   }
 
   animate()

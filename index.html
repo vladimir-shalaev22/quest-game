@@ -31,12 +31,28 @@
         </div>
         <!-- PREPARE SCREEN -->
         <!-- DICE SCREEN -->
-        <div id="dice-screen" class="game__screen game__screen_active">
+        <div id="dice-screen" class="game__screen">
           <h1 id="dice-cta" class="game__guide">Бросьте игральную кость на удачу!</h1>
           <div id="dice-result" class="game__dice">Кубик у вас в руках</div>
           <a id="make-turn" href="#" class="game__start">Бросаем!</a>
         </div>
         <!-- DICE SCREEN -->
+        <!-- QUESTION_SCREEN -->
+        <div id="question-screen" class="game__screen">
+          <h1 id="question-message" class="game__guide">Ответьте на следующий вопрос:</h1>
+          <div id="question-text" class="game__question">Сколько у жирафа пятен на голове?</div>
+          <a id="make-answer-a" href="#" class="game__answer" data-id="1">Фракции  Барнаульской городской думы</a>
+          <a id="make-answer-b" href="#" class="game__answer" data-id="2">Аппарат  Барнаульской городской думы.</a>
+          <a id="make-answer-c" href="#" class="game__answer" data-id="3">Председатель Барнаульской городской думы</a>
+        </div>
+        <!-- QUESTION_SCREEN -->
+        <!-- CONGRATULATIONS SCREEN -->
+        <div id="congratulations-screen" class="game__screen">
+          <h1 id="congratulations-message" class="game__guide">Поздравляем, вы финишировали!</h1>
+          <div id="congratulations-result" class="game__dice">Вы набрали 230 очков</div>
+          <a id="congratulations-resume" href="#" class="game__start">Продолжить игру!</a>
+        </div>
+        <!-- CONGRATULATIONS SCREEN -->
       </div>
     </div>
     <script src="game.js"></script>
