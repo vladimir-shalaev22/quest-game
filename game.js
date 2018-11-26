@@ -52,14 +52,36 @@ var __GAME__ = {};
       }
     ],
     cells: [
-      {type: CELL_TYPE_START, position: [52, 548], next: 1},
-      {type: CELL_TYPE_SIMPLE, position: [119, 482], next: 2},
-      {type: CELL_TYPE_SIMPLE, position: [171, 430], next: 3},
-      {type: CELL_TYPE_QUESTION, position: [230, 384], next: 4, question: 0},
-      {type: CELL_TYPE_SIMPLE, position: [368, 374], next: 5},
-      {type: CELL_TYPE_QUESTION, position: [436, 376], next: 6, question: 1},
-      {type: CELL_TYPE_SIMPLE, position: [499, 409], next: 7},
-      {type: CELL_TYPE_FINISH, position: [567, 427], next: 0}
+      {type: CELL_TYPE_START, position: [64,1148], next: 1},
+      {type: CELL_TYPE_SIMPLE, position: [118,1083], next: 2},
+      {type: CELL_TYPE_SIMPLE, position: [172,1029], next: 3},
+      {type: CELL_TYPE_SIMPLE, position: [228,985], next: 4},
+      {type: CELL_TYPE_SKIP, position: [300,957], left: 5, right: 11},
+      {type: CELL_TYPE_SIMPLE, position: [241,906], next: 6},
+      {type: CELL_TYPE_QUESTION, position: [181,871], next: 7, question: 0},
+      {type: CELL_TYPE_SIMPLE, position: [120,832], next: 8},
+      {type: CELL_TYPE_SKIP, position: [117,760], next: 9},
+      {type: CELL_TYPE_SIMPLE, position: [120,690], next: 10},
+      {type: CELL_TYPE_QUESTION, position: [75,637], next: 11, question: 1},
+      {type: CELL_TYPE_QUESTION, position: [370,973], next: 12, question: 0},
+      {type: CELL_TYPE_SIMPLE, position: [435,979], next: 13},
+      {type: CELL_TYPE_SIMPLE, position: [500,1009], next: 14},
+      {type: CELL_TYPE_SKIP, position: [567,1027], next: 15},
+      {type: CELL_TYPE_SIMPLE, position: [640,1024], next: 16},
+      {type: CELL_TYPE_SIMPLE, position: [710,1030], next: 17},
+      {type: CELL_TYPE_SIMPLE, position: [756,976], next: 18},
+      {type: CELL_TYPE_SIMPLE, position: [747,903], next: 19},
+      {type: CELL_TYPE_SIMPLE, position: [750,835], next: 20},
+      {type: CELL_TYPE_QUESTION, position: [700,790], next: 21, question: 1},
+      {type: CELL_TYPE_SIMPLE, position: [633,760], next: 22},
+      {type: CELL_TYPE_SIMPLE, position: [560,789], next: 23},
+      {type: CELL_TYPE_SKIP, position: [487,805], next: 24},
+      {type: CELL_TYPE_SIMPLE, position: [417,802], next: 25},
+      {type: CELL_TYPE_SIMPLE, position: [342,795], next: 26},
+      {type: CELL_TYPE_QUESTION, position: [331,724], next: 27, question: 0},
+      {type: CELL_TYPE_SIMPLE, position: [307,658], next: 28},
+      {type: CELL_TYPE_SIMPLE, position: [384,651], next: 29},
+      {type: CELL_TYPE_FINISH, position: [453,636], next: 29}
     ]
   }
 
@@ -189,7 +211,7 @@ var __GAME__ = {};
 
   /* Вычисляет текущего игрока */
   function processCurrent(state, action, players) {
-    if (state.players.length < 1) {
+    if (players.length < 1) {
       return {players: players, current: state.currentPlayer}
     }
     var current = players[state.currentPlayer]
@@ -353,6 +375,7 @@ var __GAME__ = {};
   var gameView = {
     canvas: document.getElementById('canvas'),
     screens: {
+      gameplay: document.getElementById('gameplay'),
       intro: {
         root: document.getElementById('intro-screen'),
         start: document.getElementById('start-game')
@@ -383,6 +406,11 @@ var __GAME__ = {};
         message: document.getElementById('congratulations-message'),
         result: document.getElementById('congratulations-result'),
         resume: document.getElementById('congratulations-resume')
+      },
+      score: {
+        root: document.getElementById('score-screen'),
+        results: document.getElementById('score-results'),
+        finish: document.getElementById('score-finish')
       }
     }
   }, ctx = gameView.canvas.getContext('2d')
@@ -471,7 +499,7 @@ var __GAME__ = {};
       } else {
         ctx.fillStyle = 'rgba(0, 150, 136, 1)'
       }
-      ctx.drawImage(sprites.player, position[0] - 16, position[1] - 20)
+      ctx.drawImage(sprites.player, position[0] - 16, position[1] - 25)
       ctx.textAlign = 'right'
       ctx.font = '16px Pacifico'
       ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
@@ -503,9 +531,26 @@ var __GAME__ = {};
       state.players[state.currentPlayer].name + ', ответьте на следующий вопрос:'
   }
 
+  function loadScore(state) {
+    var content = state.players.sort(function (a, b) {
+      return a.score > b.score ? -1 : a.score === b.score ? 0 : 1
+    }).reduce(function (result, player) {
+      var scoreLine = '<li class="game__score">' + player.name + ' набрал(а) '
+        + player.score + ' очков</li>'
+      return result + scoreLine
+    }, '')
+    gameView.screens.score.results.innerHTML = content
+  }
+
   function updateCongratulations(state) {
     gameView.screens.congratulations.result.innerText =
       'Вы набрали ' + state.players[state.currentPlayer].score +' очков'
+  }
+
+  function updateGameplayScreen(state) {
+    var className = state.screen === 'SCREEN_GAMEPLAY' ? 'game__canvas'
+      : 'game__canvas game__canvas_blur'
+    gameView.screens.gameplay.setAttribute('class', className)
   }
 
   function updateView(state) {
@@ -514,14 +559,19 @@ var __GAME__ = {};
       if (state.screen === 'SCREEN_QUESTION') {
         loadQuestion(state)
       }
+      if (state.screen === 'SCREEN_SCORE') {
+        loadScore(state)
+      }
       if (state.screen === 'SCREEN_CONGRATULATIONS') {
         updateCongratulations(state)
       }
+      updateGameplayScreen(state)
       updateScreen('intro', state.screen === 'SCREEN_INTRO')
       updateScreen('prepare', state.screen === 'SCREEN_PREPARE')
       updateScreen('dice', state.screen === 'SCREEN_DICE')
       updateScreen('question', state.screen === 'SCREEN_QUESTION')
       updateScreen('congratulations', state.screen === 'SCREEN_CONGRATULATIONS')
+      updateScreen('score', state.screen === 'SCREEN_SCORE')
       firstTime = false
     }
     gameView.screens.prepare.list.innerText = makePlayersList(state)
@@ -585,6 +635,11 @@ var __GAME__ = {};
   gameView.screens.congratulations.resume.addEventListener('click', function (event) {
     event.preventDefault()
     game.dispatch({type: 'GAME_RESUME'})
+  })
+
+  gameView.screens.score.finish.addEventListener('click', function (event) {
+    event.preventDefault()
+    game.dispatch({type: 'GAME_END'})
   })
 
   gameView.screens.dice.action.addEventListener('click', function (event) {

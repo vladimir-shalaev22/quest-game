@@ -10,7 +10,7 @@
   <body>
     <div class="game">
       <div class="game__window">
-        <div class="game__canvas">
+        <div id="gameplay" class="game__canvas">
           <canvas id="canvas" width="800" height="600"></canvas>
         </div>
         <!-- LOADING SCREEN -->
@@ -58,6 +58,17 @@
           <a id="congratulations-resume" href="#" class="game__start">Продолжить игру!</a>
         </div>
         <!-- CONGRATULATIONS SCREEN -->
+        <!-- SCORE SCREEN -->
+        <div id="score-screen" class="game__screen">
+          <h1 class="game__guide">Игра окончена!</h1>
+          <div class="game__dice">Спасибо, что поучаствовали. Итоги игры:</div>
+          <ol id="score-results" class="game__results">
+            <li class="game__score">Вася набрал 200</li>
+            <li class="game__score">Петя набрал 400</li>
+          </ol>
+          <a id="score-finish" href="#" class="game__start">Окончить игру!</a>
+        </div>
+        <!-- SCORE SCREEN -->
       </div>
     </div>
     <script src="game.js"></script>
