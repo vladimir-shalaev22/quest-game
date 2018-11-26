@@ -85,6 +85,11 @@ body {
   text-decoration: none;
 }
 
+.game__start_disabled {
+  color: #e0e0e0;
+  cursor: default;
+}
+
 .game__start_dice {
   margin-top: 200px;
 }
@@ -161,8 +166,8 @@ body {
 }
 
 .intro-logo {
-  margin: 40px auto;
-  width: 517px;
-  height: 335px;
+  margin: 150px auto 40px;
+  width: 546px;
+  height: 220px;
   background: url('images/logo.png');
 }

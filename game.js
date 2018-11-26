@@ -35,8 +35,52 @@ var __GAME__ = {};
   var staticData = {
     questions: [
       {
+        text: 'Кто может голосовать?',
+        answers: [
+          'Люди находящиеся под арестом',
+          'Люди достигшие 18 лет',
+          'Недееспособные'
+        ],
+        score: 50,
+        right: 1
+      },
+      {
+        text: 'Где нужно голосовать?',
+        answers: [
+          'ТИК',
+          'Банкомат',
+          'Соц. сети'
+        ],
+        score: 50,
+        right: 0
+      },
+      {
+        text: 'Кто является руководителем Барнаульской городской думы?',
+        answers: [
+          'Фракции  Барнаульской городской думы',
+          'Аппарат  Барнаульской городской думы',
+          'Председатель Барнаульской городской думы'
+        ],
+        score: 100,
+        right: 2
+      },
+      {
         text: 'Сколько депутатов состоит в  Барнаульской городской думе?',
-        answers: ['7', '50', '40'],
+        answers: [
+          '7',
+          '50',
+          '40'
+        ],
+        score: 100,
+        right: 2
+      },
+      {
+        text: 'Какой из комитетов  Барнаульской городской думы не является правовым?',
+        answers: [
+          'По социальной политике',
+          'По бюджету, налогам и финансам',
+          'По личным вопросам граждан'
+        ],
         score: 100,
         right: 2
       },
@@ -49,6 +93,146 @@ var __GAME__ = {};
         ],
         score: 50,
         right: 0
+      },
+      {
+        text: 'Сколько фракций существует в  Барнаульской городской думе?',
+        answers: [
+          '2',
+          '5',
+          '12'
+        ],
+        score: 100,
+        right: 1
+      },
+      {
+        text: 'В каком году была основана Барнаульская городская дума?',
+        answers: [
+          '1785',
+          '1954',
+          '2001'
+        ],
+        score: 100,
+        right: 0
+      },
+      {
+        text: 'Сколько было зданий у Барнаульской городской думы?',
+        answers: [
+          '1',
+          '4',
+          '2'
+        ],
+        score: 100,
+        right: 2
+      },
+      {
+        text: 'Как звали первую женщину — председателя Барнаульской городской думы?',
+        answers: [
+          'Аношкина Вера Степановна',
+          'Уланова Галина Сегеевна',
+          'Зубович Людмила Николаевна'
+        ],
+        score: 150,
+        right: 2
+      },
+      {
+        text: 'Сколько районов имеет город Барнаул?',
+        answers: [
+          '8',
+          '5',
+          '4'
+        ],
+        score: 50,
+        right: 1
+      },
+      {
+        text: 'Какой номер совета был в 2017 году?',
+        answers: [
+          'VII',
+          'V',
+          'X'
+        ],
+        score: 100,
+        right: 0
+      },
+      {
+        text: 'Сколько глав существует в уставе городского округа г. Барнаула Алтайского края?',
+        answers: [
+          '13',
+          '26',
+          '9'
+        ],
+        score: 100,
+        right: 0
+      },
+      {
+        text: 'Как изображен герб города Барнаула?',
+        answers: [
+          'Форма щита. Изображен орел',
+          'Форма щита. На зеленом фоне изображена лошадь. На голубом фоне изображена печь',
+          'Форма щита. Изображение золотого двуглавого орла. Всадник поражающий копьем дракона'
+        ],
+        score: 50,
+        right: 1
+      },
+      {
+        text: 'Какой из существующих парламентов существует  Барнаульской городской думе?',
+        answers: [
+          'Одиночный',
+          'Палата представителей',
+          'Молодежный'
+        ],
+        score: 100,
+        right: 2
+      },
+      {
+        text: 'Депутат городской думы обязан:',
+        answers: [
+          'Нарушать права человека',
+          'Действовать по личной инициативе',
+          'Лично принимать участие в заседаниях  Барнаульской городской думы'
+        ],
+        score: 50,
+        right: 2
+      },
+      {
+        text: 'Полномочия Барнаульской городской думы могут быть прекращены в случае?',
+        answers: [
+          'Принятия Думой решения о самороспуске',
+          'Утверждения структуры администрации города по представлению главы города Барнаула.',
+          'Утверждения плана приватизации муниципального имущества'
+        ],
+        score: 100,
+        right: 0
+      },
+      {
+        text: 'Главный документ Барнаульской городской думы — это?',
+        answers: [
+          'Договор',
+          'Регламент',
+          'Заявление'
+        ],
+        score: 100,
+        right: 1
+      },
+      {
+        text: 'Сколько партий было в выборах 2017 году?',
+        answers: [
+          '8',
+          '5',
+          '10'
+        ],
+        score: 100,
+        right: 0
+      },
+      {
+        text: 'На сколько лет избираются созывы Барнаульской городской думы?',
+        answers: [
+          '3',
+          '7',
+          '5'
+        ],
+        score: 100,
+        right: 2
       }
     ],
     cells: [
@@ -63,7 +247,7 @@ var __GAME__ = {};
       {type: CELL_TYPE_SKIP, position: [117,760], next: 9},
       {type: CELL_TYPE_SIMPLE, position: [120,690], next: 10},
       {type: CELL_TYPE_QUESTION, position: [75,637], next: 11, question: 1},
-      {type: CELL_TYPE_QUESTION, position: [370,973], next: 12, question: 0},
+      {type: CELL_TYPE_QUESTION, position: [370,973], next: 12, question: 2},
       {type: CELL_TYPE_SIMPLE, position: [435,979], next: 13},
       {type: CELL_TYPE_SIMPLE, position: [500,1009], next: 14},
       {type: CELL_TYPE_SKIP, position: [567,1027], next: 15},
@@ -72,16 +256,128 @@ var __GAME__ = {};
       {type: CELL_TYPE_SIMPLE, position: [756,976], next: 18},
       {type: CELL_TYPE_SIMPLE, position: [747,903], next: 19},
       {type: CELL_TYPE_SIMPLE, position: [750,835], next: 20},
-      {type: CELL_TYPE_QUESTION, position: [700,790], next: 21, question: 1},
+      {type: CELL_TYPE_QUESTION, position: [700,790], next: 21, question: 3},
       {type: CELL_TYPE_SIMPLE, position: [633,760], next: 22},
       {type: CELL_TYPE_SIMPLE, position: [560,789], next: 23},
       {type: CELL_TYPE_SKIP, position: [487,805], next: 24},
       {type: CELL_TYPE_SIMPLE, position: [417,802], next: 25},
       {type: CELL_TYPE_SIMPLE, position: [342,795], next: 26},
-      {type: CELL_TYPE_QUESTION, position: [331,724], next: 27, question: 0},
+      {type: CELL_TYPE_QUESTION, position: [331,724], next: 27, question: 4},
       {type: CELL_TYPE_SIMPLE, position: [307,658], next: 28},
       {type: CELL_TYPE_SIMPLE, position: [384,651], next: 29},
-      {type: CELL_TYPE_FINISH, position: [453,636], next: 29}
+      {type: CELL_TYPE_SIMPLE, position: [453,636], next: 30},
+      {type: CELL_TYPE_SIMPLE, position: [238,561], next: 31},
+      {type: CELL_TYPE_SIMPLE, position: [175,523], next: 32},
+      {type: CELL_TYPE_QUESTION, position: [124,474], next: 33, question: 5},
+      {type: CELL_TYPE_SIMPLE, position: [67,423], next: 34},
+      {type: CELL_TYPE_SKIP, position: [66,349], next: 35},
+      {type: CELL_TYPE_SIMPLE, position: [117,280], next: 36},
+      {type: CELL_TYPE_SIMPLE, position: [195,286], next: 37},
+      {type: CELL_TYPE_SIMPLE, position: [202,217], next: 38},
+      {type: CELL_TYPE_QUESTION, position: [139,180], next: 39, question: 6},
+      {type: CELL_TYPE_SIMPLE, position: [79,138], next: 40},
+      {type: CELL_TYPE_SIMPLE, position: [139,93], next: 41},
+      {type: CELL_TYPE_QUESTION, position: [187,37], next: 42, question: 7},
+      {type: CELL_TYPE_SIMPLE, position: [253,46], next: 43},
+      {type: CELL_TYPE_SIMPLE, position: [327,73], next: 44},
+      {type: CELL_TYPE_SIMPLE, position: [358,135], next: 45},
+      {type: CELL_TYPE_SKIP, position: [288,154], next: 46},
+      {type: CELL_TYPE_SIMPLE, position: [328,213], next: 47},
+      {type: CELL_TYPE_SIMPLE, position: [376,261], next: 48},
+      {type: CELL_TYPE_SIMPLE, position: [321,310], next: 49},
+      {type: CELL_TYPE_SKIP, position: [309,378], next: 50},
+      {type: CELL_TYPE_QUESTION, position: [372,420], next: 51, question: 8},
+      {type: CELL_TYPE_SIMPLE, position: [432,460], next: 52},
+      {type: CELL_TYPE_SIMPLE, position: [477,517], next: 53},
+      {type: CELL_TYPE_SIMPLE, position: [543,543], next: 54},
+      {type: CELL_TYPE_SIMPLE, position: [616,529], next: 55},
+      {type: CELL_TYPE_SIMPLE, position: [682,486], next: 56},
+      {type: CELL_TYPE_SIMPLE, position: [639,424], next: 57},
+      {type: CELL_TYPE_SKIP, position: [636,353], next: 58},
+      {type: CELL_TYPE_SIMPLE, position: [708,343], next: 59},
+      {type: CELL_TYPE_QUESTION, position: [702,268], next: 60, question: 9},
+      {type: CELL_TYPE_SKIP, position: [753,219], next: 61},
+      {type: CELL_TYPE_SIMPLE, position: [691,186], next: 62},
+      {type: CELL_TYPE_SIMPLE, position: [708,117], next: 63},
+      {type: CELL_TYPE_SIMPLE, position: [648,76], next: 64},
+      {type: CELL_TYPE_SIMPLE, position: [574,73], next: 65},
+      {type: CELL_TYPE_SIMPLE, position: [514,36], next: 66},
+      {type: CELL_TYPE_SIMPLE, position: [1220,1164], next: 67},
+      {type: CELL_TYPE_SIMPLE, position: [1278,1116], next: 68},
+      {type: CELL_TYPE_SIMPLE, position: [1223,1059], next: 69},
+      {type: CELL_TYPE_QUESTION, position: [1275,1003], next: 70, question: 10},
+      {type: CELL_TYPE_SIMPLE, position: [1300,933], next: 71},
+      {type: CELL_TYPE_SIMPLE, position: [1353,981], next: 72},
+      {type: CELL_TYPE_SIMPLE, position: [1368,1047], next: 73},
+      {type: CELL_TYPE_SKIP, position: [1408,1107], next: 74},
+      {type: CELL_TYPE_SIMPLE, position: [1459,1156], next: 75},
+      {type: CELL_TYPE_SIMPLE, position: [1528,1156], next: 76},
+      {type: CELL_TYPE_QUESTION, position: [11524,1083], next: 77, question: 11},
+      {type: CELL_TYPE_SIMPLE, position: [1513,1011], next: 78},
+      {type: CELL_TYPE_SIMPLE, position: [1450,978], next: 79},
+      {type: CELL_TYPE_SIMPLE, position: [1446,907], next: 80},
+      {type: CELL_TYPE_SIMPLE, position: [1462,835], next: 81},
+      {type: CELL_TYPE_SIMPLE, position: [1479,765], next: 82},
+      {type: CELL_TYPE_SKIP, position: [1407,751], next: 83},
+      {type: CELL_TYPE_SIMPLE, position: [1345,712], next: 84},
+      {type: CELL_TYPE_SIMPLE, position: [1296,658], next: 85},
+      {type: CELL_TYPE_SIMPLE, position: [1270,727], next: 86},
+      {type: CELL_TYPE_SKIP, position: [1251,790], next: 87},
+      {type: CELL_TYPE_SIMPLE, position: [1179,798], next: 88},
+      {type: CELL_TYPE_SIMPLE, position: [1122,846], next: 89},
+      {type: CELL_TYPE_SIMPLE, position: [1123,917], next: 90},
+      {type: CELL_TYPE_SIMPLE, position: [1054,954], next: 91},
+      {type: CELL_TYPE_SKIP, position: [1063,1021], next: 92},
+      {type: CELL_TYPE_SIMPLE, position: [1070,1092], next: 93},
+      {type: CELL_TYPE_SIMPLE, position: [1002,1114], next: 94},
+      {type: CELL_TYPE_QUESTION, position: [952,1063], next: 95, question: 12},
+      {type: CELL_TYPE_SIMPLE, position: [897,1012], next: 96},
+      {type: CELL_TYPE_SKIP, position: [892,945], next: 97},
+      {type: CELL_TYPE_QUESTION, position: [925,877], next: 98, question: 13},
+      {type: CELL_TYPE_SIMPLE, position: [928,805], next: 99},
+      {type: CELL_TYPE_QUESTION, position: [970,753], next: 100, question: 14},
+      {type: CELL_TYPE_SIMPLE, position: [1032,723], next: 101},
+      {type: CELL_TYPE_SIMPLE, position: [1066,658], next: 102},
+      {type: CELL_TYPE_SIMPLE, position: [994,654], next: 103},
+      {type: CELL_TYPE_SIMPLE, position: [928,636], next: 104},
+      {type: CELL_TYPE_SKIP, position: [850,561], next: 105},
+      {type: CELL_TYPE_SIMPLE, position: [838,492], next: 106},
+      {type: CELL_TYPE_SIMPLE, position: [892,447], next: 107},
+      {type: CELL_TYPE_QUESTION, position: [961,424], next: 108, question: 15},
+      {type: CELL_TYPE_SIMPLE, position: [1020,464], next: 109},
+      {type: CELL_TYPE_SIMPLE, position: [1072,519], next: 110},
+      {type: CELL_TYPE_SIMPLE, position: [1138,546], next: 111},
+      {type: CELL_TYPE_SKIP, position: [1152,472], next: 112},
+      {type: CELL_TYPE_SIMPLE, position: [1144,403], next: 113},
+      {type: CELL_TYPE_SIMPLE, position: [1095,354], next: 114},
+      {type: CELL_TYPE_SKIP, position: [1024,325], next: 115},
+      {type: CELL_TYPE_QUESTION, position: [960,291], next: 116, question: 16},
+      {type: CELL_TYPE_SIMPLE, position: [891,265], next: 117},
+      {type: CELL_TYPE_SIMPLE, position: [840,219], next: 118},
+      {type: CELL_TYPE_SIMPLE, position: [900,180], next: 119},
+      {type: CELL_TYPE_QUESTION, position: [969,151], next: 120, question: 17},
+      {type: CELL_TYPE_SIMPLE, position: [1033,120], next: 121},
+      {type: CELL_TYPE_SIMPLE, position: [1102,121], next: 122},
+      {type: CELL_TYPE_SIMPLE, position: [1147,175], next: 123},
+      {type: CELL_TYPE_SIMPLE, position: [1158,238], next: 124},
+      {type: CELL_TYPE_SIMPLE, position: [1198,295], next: 125},
+      {type: CELL_TYPE_QUESTION, position: [1219,366], next: 126, question: 18},
+      {type: CELL_TYPE_SIMPLE, position: [1254,423], next: 127},
+      {type: CELL_TYPE_SIMPLE, position: [1308,468], next: 128},
+      {type: CELL_TYPE_SIMPLE, position: [1363,433], next: 129},
+      {type: CELL_TYPE_SIMPLE, position: [1405,495], next: 130},
+      {type: CELL_TYPE_SKIP, position: [1452,547], next: 131},
+      {type: CELL_TYPE_SIMPLE, position: [1522,546], next: 132},
+      {type: CELL_TYPE_QUESTION, position: [1513,477], next: 133, question: 19},
+      {type: CELL_TYPE_SIMPLE, position: [1558,421], next: 134},
+      {type: CELL_TYPE_SIMPLE, position: [1500,373], next: 135},
+      {type: CELL_TYPE_SIMPLE, position: [1459,310], next: 136},
+      {type: CELL_TYPE_SIMPLE, position: [1461,234], next: 137},
+      {type: CELL_TYPE_SIMPLE, position: [1395,240], next: 138},
+      {type: CELL_TYPE_SKIP, position: [1351,181], next: 139},
+      {type: CELL_TYPE_SIMPLE, position: [1380,123], next: 140},
+      {type: CELL_TYPE_SIMPLE, position: [1443,84], next: 141},
+      {type: CELL_TYPE_FINISH, position: [1531,54], next: 141},
     ]
   }
 
@@ -473,7 +769,7 @@ var __GAME__ = {};
       ctx.clearRect(0, 0, 800, 600)
       ctx.translate(-viewport[0], -viewport[1])
     }
-    game.staticData.cells.forEach(function renderCell(cell) {
+    game.staticData.cells.forEach(function renderCell(cell, index) {
       var sprite;
       var offset;
       ctx.fillStyle = 'rgba(46, 42, 94, 1)'
@@ -491,6 +787,12 @@ var __GAME__ = {};
           offset = 30; sprite = sprites.cell
       }
       ctx.drawImage(sprite, cell.position[0] - offset, cell.position[1] - offset)
+      if (cell.type === 'CELL_TYPE_SIMPLE') {
+        ctx.textAlign = 'center'
+        ctx.font = '14px Pacifico'
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+        ctx.fillText(index, cell.position[0], cell.position[1] + 2)
+      }
     })
     state.players.forEach(function renderPlayer(player) {
       var position = calcMovementPosition(player)
@@ -553,6 +855,14 @@ var __GAME__ = {};
     gameView.screens.gameplay.setAttribute('class', className)
   }
 
+  function updatePrepare(state) {
+    if (state.players.length !== prevState.players.length) {
+      var className = state.players.length > 0 ?
+        'game__start' : 'game__start game__start_disabled'
+      gameView.screens.prepare.start.setAttribute('class', className)
+    }
+  }
+
   function updateView(state) {
     if (prevState.screen !== state.screen) {
       console.log('Экран изменился!')
@@ -576,6 +886,7 @@ var __GAME__ = {};
     }
     gameView.screens.prepare.list.innerText = makePlayersList(state)
     updateDiceScreen(state)
+    updatePrepare(state)
     renderField(state)
     prevState = state
   }
@@ -621,7 +932,7 @@ var __GAME__ = {};
   gameView.screens.prepare.add.addEventListener('click', function (event) {
     var name = gameView.screens.prepare.name.value
     event.preventDefault()
-    if (name !== '') {
+    if (name !== '' && game.getState().players.length < 5) {
       gameView.screens.prepare.name.value = ''
       game.addPlayer({name: name})
     }
@@ -629,7 +940,9 @@ var __GAME__ = {};
 
   gameView.screens.prepare.start.addEventListener('click', function (event) {
     event.preventDefault()
-    game.dispatch({type: 'GAME_START'})
+    if (game.getState().players.length > 0) {
+      game.dispatch({type: 'GAME_START'})
+    }
   })
 
   gameView.screens.congratulations.resume.addEventListener('click', function (event) {
