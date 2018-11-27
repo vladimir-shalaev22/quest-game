@@ -1,5 +1,11 @@
 var __GAME__ = {};
 
+(function() {
+  var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                              window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  window.requestAnimationFrame = requestAnimationFrame;
+})();
+
 (function (game) {
   /* Все экраны игры (её стадии) */
   var SCREEN_INTRO = 'SCREEN_INTRO'
@@ -12,7 +18,7 @@ var __GAME__ = {};
   var SCREEN_SCORE = 'SCREEN_SCORE'
   /* Игровые процессы или действия */
   var ACTION_NONE = 'ACTION_NONE'
-  var ANIMATION_SPEED = 0.003
+  var ANIMATION_SPEED = 0.001
   /* Типы клеточек по которым мы передвигаемся */
   var CELL_TYPE_START = 'CELL_TYPE_START'
   var CELL_TYPE_SIMPLE = 'CELL_TYPE_SIMPLE'
@@ -718,8 +724,11 @@ var __GAME__ = {};
     'warning': 'images/cell-w.png',
     'finish': 'images/cell-f.png',
     'start': 'images/cell-s.png',
-    'player': 'images/player.png'
+    'player': 'images/player.png',
+    'background': 'images/background.jpg'
   }
+
+  var lasttime = 0;
 
   function updateScreen(name, isOpen) {
     gameView.screens[name].root
@@ -768,45 +777,55 @@ var __GAME__ = {};
       ctx.setTransform(1, 0, 0, 1, 0, 0)
       ctx.clearRect(0, 0, 800, 600)
       ctx.translate(-viewport[0], -viewport[1])
+      ctx.drawImage(sprites.background, 0, 0)
+      game.staticData.cells.forEach(function renderCell(cell, index) {
+        var sprite;
+        var offset;
+        if (
+          viewport &&
+          cell.position[0] + 46 < viewport[0] ||
+          cell.position[0] - 46 > viewport[0] + 800 ||
+          cell.position[1] + 46 < viewport[1] ||
+          cell.position[1] - 46 > viewport[1] + 600
+        ) {
+          return false
+        }
+        ctx.fillStyle = 'rgba(46, 42, 94, 1)'
+        switch (cell.type) {
+          case 'CELL_TYPE_SKIP':
+          case 'CELL_TYPE_RETURN':
+            offset = 30; sprite = sprites.warning; break;
+          case 'CELL_TYPE_START':
+            offset = 45; sprite = sprites.start; break;
+          case 'CELL_TYPE_FINISH':
+            offset = 45; sprite = sprites.finish; break;
+          case 'CELL_TYPE_QUESTION':
+            offset = 30; sprite = sprites.question; break;
+          default:
+            offset = 30; sprite = sprites.cell
+        }
+        ctx.drawImage(sprite, cell.position[0] - offset, cell.position[1] - offset)
+        if (cell.type === 'CELL_TYPE_SIMPLE') {
+          ctx.textAlign = 'center'
+          ctx.font = '14px Pacifico'
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+          ctx.fillText(index, cell.position[0], cell.position[1] + 2)
+        }
+      })
+      state.players.forEach(function renderPlayer(player) {
+        var position = calcMovementPosition(player)
+        if (player.isMoving) {
+          ctx.fillStyle = 'rgba(250, 236, 0, 1)'
+        } else {
+          ctx.fillStyle = 'rgba(0, 150, 136, 1)'
+        }
+        ctx.drawImage(sprites.player, position[0] - 16, position[1] - 25)
+        ctx.textAlign = 'right'
+        ctx.font = '16px Pacifico'
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
+        ctx.fillText(player.name, position[0] - 25, position[1] + 4)
+      })
     }
-    game.staticData.cells.forEach(function renderCell(cell, index) {
-      var sprite;
-      var offset;
-      ctx.fillStyle = 'rgba(46, 42, 94, 1)'
-      switch (cell.type) {
-        case 'CELL_TYPE_SKIP':
-        case 'CELL_TYPE_RETURN':
-          offset = 30; sprite = sprites.warning; break;
-        case 'CELL_TYPE_START':
-          offset = 45; sprite = sprites.start; break;
-        case 'CELL_TYPE_FINISH':
-          offset = 45; sprite = sprites.finish; break;
-        case 'CELL_TYPE_QUESTION':
-          offset = 30; sprite = sprites.question; break;
-        default:
-          offset = 30; sprite = sprites.cell
-      }
-      ctx.drawImage(sprite, cell.position[0] - offset, cell.position[1] - offset)
-      if (cell.type === 'CELL_TYPE_SIMPLE') {
-        ctx.textAlign = 'center'
-        ctx.font = '14px Pacifico'
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
-        ctx.fillText(index, cell.position[0], cell.position[1] + 2)
-      }
-    })
-    state.players.forEach(function renderPlayer(player) {
-      var position = calcMovementPosition(player)
-      if (player.isMoving) {
-        ctx.fillStyle = 'rgba(250, 236, 0, 1)'
-      } else {
-        ctx.fillStyle = 'rgba(0, 150, 136, 1)'
-      }
-      ctx.drawImage(sprites.player, position[0] - 16, position[1] - 25)
-      ctx.textAlign = 'right'
-      ctx.font = '16px Pacifico'
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
-      ctx.fillText(player.name, position[0] - 25, position[1] + 4)
-    })
   }
 
   function updateDiceScreen(state) {
@@ -965,9 +984,10 @@ var __GAME__ = {};
     }, 500)
   })
 
-  function animate() {
-    game.dispatch({type: 'GAME_NEXT_FRAME', delta: 10})
-    setTimeout(animate, 50)
+  function animate(time) {
+    game.dispatch({type: 'GAME_NEXT_FRAME', delta: time - lasttime})
+    lasttime = time
+    requestAnimationFrame(animate)
   }
 
   function loader() {
